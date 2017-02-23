@@ -23,7 +23,7 @@ public class RecursiveWalk {
             byte[] b = new byte[BUFFER_LENGTH];
             int sz = 0;
             try {
-                while ((sz = input.read(b, 0, b.length)) >= 0) {
+                while ((sz = input.read(b)) >= 0) {
                     for (int i = 0; i < sz; i++) {
                         hash = (hash * FNV_PRIME) % FNV_MOD ^ ((long) b[i] & NEEDED_BITS);
                     }
