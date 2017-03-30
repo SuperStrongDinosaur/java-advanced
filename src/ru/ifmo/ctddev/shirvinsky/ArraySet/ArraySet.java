@@ -5,7 +5,7 @@ import java.util.*;
 /**
  * Created by SuperStrongDinosaur on 23.02.17.
  */
-public class ArraySet<T> extends AbstractSet<T> implements NavigableSet<T>{
+public class ArraySet<T> extends AbstractSet<T> implements NavigableSet<T> {
     final private List<T> list;
     final private Comparator<T> comparator;
 
@@ -32,35 +32,37 @@ public class ArraySet<T> extends AbstractSet<T> implements NavigableSet<T>{
         }
     }
 
-    private T correct_res_for_binary_search(int ifEqual, int ifNeededLower, T e) {
+    private T correctResForBinarySearch(int ifEqual, int ifNeededLower, T e) {
         int index = Collections.binarySearch(list, e, comparator);
-        if(index >= 0)
+        if (index >= 0) {
             index += ifEqual;
-        else
+        } else {
             index = -index - 1 - ifNeededLower;
-        if(index >= 0 && index < list.size())
+        }
+        if (index >= 0 && index < list.size()) {
             return list.get(index);
+        }
         return null;
     }
 
     @Override
     public T lower(T t) {
-        return correct_res_for_binary_search(-1, 1, t);
+        return correctResForBinarySearch(-1, 1, t);
     }
 
     @Override
     public T floor(T t) {
-        return correct_res_for_binary_search(0, 1, t);
+        return correctResForBinarySearch(0, 1, t);
     }
 
     @Override
     public T ceiling(T t) {
-        return correct_res_for_binary_search(0, 0, t);
+        return correctResForBinarySearch(0, 0, t);
     }
 
     @Override
     public T higher(T t) {
-        return correct_res_for_binary_search(1, 0, t);
+        return correctResForBinarySearch(1, 0, t);
     }
 
     @Override
@@ -78,33 +80,6 @@ public class ArraySet<T> extends AbstractSet<T> implements NavigableSet<T>{
         return Collections.unmodifiableList(list).iterator();
     }
 
-    private class DescendingList<E> extends AbstractList<E> implements RandomAccess {
-        private final List<E> list;
-        private final boolean isReversed;
-
-        DescendingList(List<E> list) {
-            if (!(list instanceof DescendingList)) {
-                this.list = list;
-                isReversed = true;
-            } else {
-                this.list = ((DescendingList<E>) list).list;
-                isReversed = !((DescendingList<E>) list).isReversed;
-            }
-        }
-
-        @Override
-        public int size() {
-            return list.size();
-        }
-
-        @Override
-        public E get(int index) {
-            if(isReversed)
-                return list.get(size() - index - 1);
-            return list.get(index);
-        }
-    }
-
     @Override
     public NavigableSet<T> descendingSet() {
         return new ArraySet<>(new DescendingList<>(list), Collections.reverseOrder(comparator));
@@ -118,16 +93,18 @@ public class ArraySet<T> extends AbstractSet<T> implements NavigableSet<T>{
     @Override
     public NavigableSet<T> subSet(T fromElement, boolean fromInclusive, T toElement, boolean toInclusive) {
         int fromIndex = Collections.binarySearch(list, fromElement, comparator);
-        if(fromIndex < 0)
-            fromIndex =  -fromIndex - 1;
-        else if(!fromInclusive)
+        if (fromIndex < 0) {
+            fromIndex = -fromIndex - 1;
+        } else if (!fromInclusive) {
             fromIndex++;
+        }
 
         int toIndex = Collections.binarySearch(list, toElement, comparator);
-        if(toIndex < 0)
-            toIndex =  -toIndex - 1;
-        else if(toInclusive)
+        if (toIndex < 0) {
+            toIndex = -toIndex - 1;
+        } else if (toInclusive) {
             toIndex++;
+        }
 
         if (fromIndex > toIndex) {
             fromIndex = toIndex;
@@ -183,13 +160,42 @@ public class ArraySet<T> extends AbstractSet<T> implements NavigableSet<T>{
 
     @Override
     public int size() {
-        if(list == null)
+        if (list == null) {
             return 0;
+        }
         return list.size();
     }
 
     @Override
     public boolean contains(Object o) {
         return Collections.binarySearch(list, o, (Comparator<Object>) comparator) >= 0;
+    }
+
+    private class DescendingList<E> extends AbstractList<E> implements RandomAccess {
+        private final List<E> list;
+        private final boolean isReversed;
+
+        DescendingList(List<E> list) {
+            if (!(list instanceof DescendingList)) {
+                this.list = list;
+                isReversed = true;
+            } else {
+                this.list = ((DescendingList<E>) list).list;
+                isReversed = !((DescendingList<E>) list).isReversed;
+            }
+        }
+
+        @Override
+        public int size() {
+            return list.size();
+        }
+
+        @Override
+        public E get(int index) {
+            if (isReversed) {
+                return list.get(size() - index - 1);
+            }
+            return list.get(index);
+        }
     }
 }
