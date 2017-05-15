@@ -15,18 +15,18 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Sends tasks, sent by {@link MyHelloClient} and answers them.
+ * Sends tasks, sent by {@link HelloUDPClient} and answers them.
  */
-public class MyHelloServer implements HelloServer {
+public class HelloUDPServer implements HelloServer {
     private static final int TIMEOUT = 1000;
     private ExecutorService service;
     private DatagramSocket socket;
 
     /**
-     * Entry point for {@link MyHelloServer}.
+     * Entry point for {@link HelloUDPServer}.
      */
     public static void main(String[] args) {
-        MyHelloServer server = new MyHelloServer();
+        HelloUDPServer server = new HelloUDPServer();
         server.start(8004, 3);
     }
 

@@ -7,28 +7,23 @@ package ru.ifmo.ctddev.shirvinsky.hello;
 import info.kgeorgiy.java.advanced.hello.HelloClient;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.io.UnsupportedEncodingException;
+import java.net.*;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Sends request to the server, accepts the results and prints them.
  */
-public class MyHelloClient implements HelloClient {
-    private static final int TIMEOUT = 100;
+public class HelloUDPClient implements HelloClient {
+    private static final int TIMEOUT = 1000;
+    private CountDownLatch countDown;
 
     /**
-     * Entry point for {@link MyHelloClient}.
+     * Entry point for {@link HelloUDPClient}.
      */
     public static void main(String[] args) {
-        MyHelloClient client = new MyHelloClient();
-        client.start(args[0], Integer.parseInt(args[1]), args[2], Integer.parseInt(args[3]), Integer.parseInt(args[4]));
+        HelloUDPClient client = new HelloUDPClient();
+        client.run(args[0], Integer.parseInt(args[1]), args[2], Integer.parseInt(args[3]), Integer.parseInt(args[4]));
     }
 
     /**
@@ -41,32 +36,41 @@ public class MyHelloClient implements HelloClient {
      * @param nThreads number of threads.
      */
     @Override
-    public void start(String host, int port, String prefix, int requests, int nThreads) {
-        ExecutorService service = Executors.newFixedThreadPool(nThreads);
+    public void run(String host, int port, String prefix, int requests, int nThreads) {
+        countDown = new CountDownLatch(nThreads);
         try {
             InetAddress address = InetAddress.getByName(host);
-            List<Callable<Object>> list = new ArrayList<>();
             for (int i = 0; i < nThreads; i++) {
                 final int threadNumber = i;
-                list.add(() -> {
-                    DatagramSocket socket = new DatagramSocket();
-                    socket.setSoTimeout(TIMEOUT);
-
-                    byte[] buffer = new byte[socket.getReceiveBufferSize()];
+                Thread a = new Thread(() -> {
+                    DatagramSocket socket = null;
+                    byte[] buffer = new byte[0];
+                    try {
+                        socket = new DatagramSocket();
+                        socket.setSoTimeout(TIMEOUT);
+                        buffer = new byte[socket.getReceiveBufferSize()];
+                    } catch (SocketException e) {
+                        e.printStackTrace();
+                    }
                     for (int queryNumber = 0; queryNumber < requests; queryNumber++) {
                         String s = prefix + threadNumber + "_" + queryNumber;
-                        byte[] sending_data = s.getBytes("UTF8");
+                        byte[] sending_data = new byte[0];
+                        try {
+                            sending_data = s.getBytes("UTF8");
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
                         DatagramPacket sending = new DatagramPacket(sending_data, sending_data.length, address, port);
                         DatagramPacket received = new DatagramPacket(buffer, buffer.length);
-                        String req = "Hello, " + s, res = "";
-                        while (!req.equals(res)) {
+                        String res = "";
+                        while (!res.contains(s)) {
                             try {
                                 socket.send(sending);
                                 try {
                                     socket.receive(received);
                                     res = new String(received.getData(), received.getOffset(), received.getLength());
                                 } catch (IOException e) {
-                                    System.err.println("Error to receive packet: " + e.getMessage());
+                                    //    System.err.println("Error to receive packet: " + e.getMessage());
                                 }
                             } catch (IOException e) {
                                 System.err.println("Error to send packet: " + e.getMessage());
@@ -74,16 +78,17 @@ public class MyHelloClient implements HelloClient {
                         }
                     }
                     socket.close();
-                    return null;
+                    countDown.countDown();
                 });
+                a.start();
             }
-            service.invokeAll(list);
-        } catch (InterruptedException e) {
-            System.err.println("Worker is interrupted: " + e.getMessage());
         } catch (UnknownHostException e) {
             System.err.println("Unknown host: " + e.getMessage());
-        } finally {
-            service.shutdown();
+        }
+        try {
+            countDown.await();
+        } catch (InterruptedException e) {
+            System.out.println("Await interrupted");
         }
     }
 }
