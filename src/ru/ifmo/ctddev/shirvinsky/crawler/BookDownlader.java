@@ -12,7 +12,7 @@ import java.nio.file.Paths;
  */
 public class BookDownlader {
 
-    private static int cntPages = 2;
+    private static int cntPages = 1;
 
     static boolean isBook(File entry) {
         return false;
@@ -27,13 +27,14 @@ public class BookDownlader {
             try {
                 Path path = Paths.get(Folder);
                 WebCrawler crawler = new WebCrawler(new CachingDownloader(path), 10, 10, 100);
-                //   crawler.downloadBooks(page);
+                crawler.downloadBooks(page);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        File[] folderEntries = Paths.get(Folder).toFile().listFiles();
+        File f = new File(Folder);
+        File[] folderEntries = f.listFiles();
         for (File entry : folderEntries) {
             if (isBook(entry)) {
                 entry.delete();
@@ -46,7 +47,7 @@ public class BookDownlader {
         String physics = "918";
         String informatics = "1537";
         downloadCategory(physics);
-        //     downloadCategory(math);
-        //     downloadCategory(informatics);
+        downloadCategory(math);
+        downloadCategory(informatics);
     }
 }

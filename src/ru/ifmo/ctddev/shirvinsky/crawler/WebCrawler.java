@@ -75,18 +75,18 @@ public class WebCrawler implements Crawler {
     }
 
     public void downloadBooks(String page) {
-        downloadService.submit(() -> {
+       // downloadService.submit(() -> {
             try {
                 final Document document = downloader.download(page);
                 extractService.submit(() -> {
                     try {
                         document.extractLinks().forEach(link -> {
-                            System.out.println(link);
-                            if (link.contains("#book_name")) {
-                                downloadService.submit(() -> {
+                 //           System.out.println(link);
+                            if (link.contains("?category_pk=")) {
+                             //   downloadService.submit(() -> {
                                     try {
                                         final Document bookPage = downloader.download(link);
-                                        bookPage.extractLinks().forEach(link1 -> {
+                                      /*  bookPage.extractLinks().forEach(link1 -> {
                                             if (link1.contains("")) { //TODO add book ident
                                                 try {
                                                     final Document book = downloader.download(link1);
@@ -94,11 +94,11 @@ public class WebCrawler implements Crawler {
                                                     e.printStackTrace();
                                                 }
                                             }
-                                        });
+                                        });*/
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
-                                });
+                          //      });
 
                             }
                         });
@@ -109,7 +109,7 @@ public class WebCrawler implements Crawler {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        });
+    //    });
     }
 
     private void extractProduce(String url, int depth) {

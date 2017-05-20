@@ -32,14 +32,14 @@ public class RecursiveWalk {
                 System.err.println("Error while calculating hash:" + e.getMessage());
                 return FileVisitResult.CONTINUE;
             }
-            out.write(String.format("%08x", hash) + " " + path.toString() + System.getProperty("line.separator"));
+            out.write(String.format("%08x", hash) + " " + path.toString() + "\n");
             return FileVisitResult.CONTINUE;
         }
 
         @Override
         public FileVisitResult visitFileFailed(Path path, IOException e) throws IOException{
             System.err.println("Can not read file " + path.toString());
-            out.write(String.format("%08x", 0) + " " + path.toString() + System.getProperty("line.separator"));
+            out.write(String.format("%08x", 0) + " " + path.toString() + "\n");
             return FileVisitResult.CONTINUE;
         }
     }
